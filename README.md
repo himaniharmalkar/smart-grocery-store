@@ -12,7 +12,7 @@ Key Features:
 2. Customers Also Bought: Recommends items based on association rules, derived from the Apriori Algorithm.
 3. Personalized Recommendations: Enhances user experience by delivering personalized product suggestions.
 
-Algorithms Used: Apriori Algorithm
+Algorithm Used:
 The main algorithm used for this project is the Apriori Algorithm. It is employed to discover frequent itemsets in transaction data and generate association rules that form the basis of product recommendations.
 
 Working:
