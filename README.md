@@ -14,6 +14,7 @@ Key Features:
 
 Algorithms Used: Apriori Algorithm
 The main algorithm used for this project is the Apriori Algorithm. It is employed to discover frequent itemsets in transaction data and generate association rules that form the basis of product recommendations.
+
 Working:
 Frequent Itemset Mining: Identifies frequent itemsets by calculating support.
 Association Rule Generation: Generates association rules using confidence and lift metrics.
