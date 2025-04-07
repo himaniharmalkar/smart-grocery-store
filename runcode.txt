@@ -1,0 +1,368 @@
+import pandas as pd
+from mlxtend.frequent_patterns import apriori, association_rules
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+import logging
+import time
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+
+app = Flask(__name__)
+CORS(app)
+
+# Sample grocery dataset (consider expanding this with real transaction data)
+data = {
+    'Transaction': [1, 1, 1, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5],
+    'Item': ['Bread', 'Milk', 'Eggs', 'Bread', 'Milk', 
+             'Bread', 'Eggs', 'Milk', 'Eggs', 'Cheese', 
+             'Bread', 'Milk', 'Cheese']
+}
+
+df = pd.DataFrame(data)
+
+# Create a one-hot encoded DataFrame
+one_hot = pd.crosstab(df['Transaction'], df['Item'])
+
+# Generate frequent itemsets with adjusted support
+frequent_itemsets = apriori(one_hot, min_support=0.3, use_colnames=True)  # Increased min_support
+
+# Generate association rules with a focus on lift as well
+rules = association_rules(frequent_itemsets, metric="lift", min_threshold=1.2)  # Changed metric to lift
+
+# Function to get overall frequently bought together items
+def get_frequent_items():
+    top_rules = rules.sort_values('support', ascending=False).head(5)  # Fetch top 5 for more diversity
+    frequent_items = set()
+    for _, row in top_rules.iterrows():
+        frequent_items.update(row['antecedents'])
+        frequent_items.update(row['consequents'])
+    return list(frequent_items)
+
+# Function to get personalized recommendations based on cart items
+def get_personalized_recommendations(cart_items):
+    recommendations = set()
+    for item in cart_items:
+        item_rules = rules[rules['antecedents'].apply(lambda x: item in x)]
+        if not item_rules.empty:
+            # Get top N recommendations from the rules
+            top_recommendations = item_rules.sort_values('confidence', ascending=False)['consequents'].tolist()
+            recommendations.update(top_recommendations)
+    # Return recommendations that are not in the cart, limit to a maximum of 5
+    return list(recommendations - set(cart_items))[:5]
+
+# Sample product data with prices in rupees
+products = [
+    {"id": 1, "name": "Bread", "price": 40},
+    {"id": 2, "name": "Milk", "price": 60},
+    {"id": 3, "name": "Eggs", "price": 80},
+    {"id": 4, "name": "Cheese", "price": 120},
+]
+
+# Caching for frequent items
+cached_frequent_items = []
+last_fetched_time = 0
+CACHE_DURATION = 60  # seconds
+
+@app.route('/products', methods=['GET'])
+def get_products():
+    """Endpoint to get the list of products."""
+    return jsonify(products)
+
+@app.route('/frequent_items', methods=['GET'])
+def frequent_items():
+    global cached_frequent_items, last_fetched_time
+    current_time = time.time()
+
+    # Check if the cached data is still valid
+    if current_time - last_fetched_time < CACHE_DURATION:
+        logging.debug("Serving cached frequent items.")
+        return jsonify(cached_frequent_items)
+
+    # Fetch new frequent items
+    logging.debug("frequent_items endpoint was called.")
+    items = get_frequent_items()
+    cached_frequent_items = [p for p in products if p['name'] in items]
+    last_fetched_time = current_time
+    return jsonify(cached_frequent_items)
+
+@app.route('/personalized_recommendations', methods=['POST'])
+def personalized_recommendations():
+    """Endpoint to get personalized recommendations based on cart items."""
+    cart_items = request.json.get('cart_items', [])
+    if not isinstance(cart_items, list):
+        return jsonify({"error": "cart_items should be a list"}), 400
+    
+    recommendations = get_personalized_recommendations(cart_items)
+    recommended_products = [p for p in products if p['name'] in recommendations]
+    
+    return jsonify(recommended_products)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Grocery Store</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #45a049;
+            --background-color: #f0f0f0;
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        main {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        #product-list {
+            flex: 2;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .product {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .product:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        #cart-and-recommendations {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        #cart, #frequent-items, #personalized-recommendations {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        ul {
+            list-style-type: none;
+        }
+
+        li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        li:last-child {
+            border-bottom: none;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        #cart-total {
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            main {
+                flex-direction: column;
+            }
+
+            #product-list, #cart-and-recommendations {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Virtual Grocery Store</h1>
+    </header>
+    <main>
+        <section id="product-list">
+            <!-- Products will be dynamically added here -->
+        </section>
+        <section id="cart-and-recommendations">
+            <div id="cart">
+                <h2>Shopping Cart</h2>
+                <ul id="cart-items">
+                    <!-- Cart items will be dynamically added here -->
+                </ul>
+                <div id="cart-total">Total: ₹0.00</div>
+            </div>
+            <div id="frequent-items">
+                <h2>Frequently Bought Together</h2>
+                <ul id="frequent-items-list">
+                    <!-- Frequent items will be dynamically added here -->
+                </ul>
+            </div>
+            <div id="personalized-recommendations">
+                <h2>Recommended for You</h2>
+                <ul id="personalized-recommendations-list">
+                    <!-- Personalized recommendations will be dynamically added here -->
+                </ul>
+            </div>
+        </section>
+    </main>
+    <script>
+        const productList = document.getElementById('product-list');
+        const cartItems = document.getElementById('cart-items');
+        const cartTotal = document.getElementById('cart-total');
+        const frequentItemsList = document.getElementById('frequent-items-list');
+        const personalizedRecommendationsList = document.getElementById('personalized-recommendations-list');
+
+        let products = [];
+        let cart = [];
+
+        async function fetchProducts() {
+            try {
+                const response = await fetch('http://localhost:5000/products');
+                products = await response.json();
+                displayProducts();
+            } catch (error) {
+                console.error('Error fetching products:', error);
+            }
+        }
+
+        function displayProducts() {
+            productList.innerHTML = '';
+            products.forEach(product => {
+                const productDiv = document.createElement('div');
+                productDiv.className = 'product';
+                productDiv.innerHTML = `
+                    <h3>${product.name}</h3>
+                    <p>Price: ₹${product.price}</p>
+                    <button onclick="addToCart(${product.id})">Add to Cart</button>
+                `;
+                productList.appendChild(productDiv);
+            });
+        }
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!cart.includes(product)) {
+                cart.push(product);
+                updateCart();
+                fetchFrequentItems();
+                fetchPersonalizedRecommendations();
+            }
+        }
+
+        function updateCart() {
+            cartItems.innerHTML = '';
+            let total = 0;
+            cart.forEach(product => {
+                const li = document.createElement('li');
+                li.textContent = `${product.name} - ₹${product.price}`;
+                cartItems.appendChild(li);
+                total += product.price;
+            });
+            cartTotal.textContent = `Total: ₹${total.toFixed(2)}`;
+        }
+
+        async function fetchFrequentItems() {
+            try {
+                const response = await fetch('http://localhost:5000/frequent_items');
+                const frequentItems = await response.json();
+                displayFrequentItems(frequentItems);
+            } catch (error) {
+                console.error('Error fetching frequent items:', error);
+            }
+        }
+
+        function displayFrequentItems(items) {
+            frequentItemsList.innerHTML = '';
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item.name;
+                frequentItemsList.appendChild(li);
+            });
+        }
+
+        async function fetchPersonalizedRecommendations() {
+            try {
+                const response = await fetch('http://localhost:5000/personalized_recommendations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ cart_items: cart.map(p => p.name) })
+                });
+                const recommendations = await response.json();
+                displayPersonalizedRecommendations(recommendations);
+            } catch (error) {
+                console.error('Error fetching personalized recommendations:', error);
+            }
+        }
+
+        function displayPersonalizedRecommendations(recommendations) {
+            personalizedRecommendationsList.innerHTML = '';
+            recommendations.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item.name;
+                personalizedRecommendationsList.appendChild(li);
+            });
+        }
+
+        // Initial fetch for products
+        fetchProducts();
+    </script>
+</body>
+</html>
+

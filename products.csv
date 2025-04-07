@@ -1,0 +1,51 @@
+id,name,price,category,image
+1,Fresh Bread,40,Bakery,Images/bread.jpg
+2,Organic Milk,60,Dairy,Images/milk.jpeg
+3,Free-Range Eggs,80,Dairy,Images/eggs.jpg
+4,Cheddar Cheese,120,Dairy,Images/cheddar_cheese.jpg
+5,Greek Yogurt,50,Dairy,Images/yoghurt.jpeg
+6,Chicken Breast,200,Meat,Images/chicken.jpeg
+7,Premium Sausages,250,Meat,Images/sausage.jpeg
+8,Fresh Salmon,180,Seafood,Images/salmon.jpeg
+9,Gala Apples,100,Fruits,Images/apples.jpeg
+10,Organic Bananas,60,Fruits,Images/bananas.jpg
+11,Sweet Oranges,80,Fruits,Images/orange.jpg
+12,Roma Tomatoes,70,Vegetables,Images/tomatoes.jpeg
+13,Russet Potatoes,50,Vegetables,Images/potatoes.png
+14,Red Onions,40,Vegetables,Images/onions.jpg
+15,Whole Grain Pasta,70,Grains,Images/pasta.jpeg
+16,Avocados,90,Fruits,Images/avocados.jpeg
+17,Bell Peppers,65,Vegetables,Images/bell peppers.jpeg
+18,Strawberries,110,Fruits,Images/strawberries.jpeg
+19,Ground Beef,180,Meat,Images/mutton.jpg
+20,Bagels,45,Bakery,Images/bagels.jpeg
+21,Lychees,50,Fruits,Images/lychees.png
+22,Almond Milk,70,Dairy,Images/almond_milk.jpg
+23,Butter,90,Dairy,Images/butter.jpg
+24,Parmesan Cheese,150,Dairy,Images/parmesan.jpg
+25,Cottage Cheese,80,Dairy,Images/cottage_cheese.jpg
+26,Turkey Breast,220,Meat,Images/turkey.jpg
+27,Bacon,300,Meat,Images/bacon.jpg
+28,Tuna Fillets,200,Seafood,Images/tuna.jpg
+29,Peaches,90,Fruits,Images/peaches.jpg
+30,Blueberries,120,Fruits,Images/blueberries.jpg
+31,Lemons,50,Fruits,Images/lemons.jpg
+32,Carrots,40,Vegetables,Images/carrots.jpg
+33,Broccoli,60,Vegetables,Images/broccoli.jpg
+34,Cauliflower,75,Vegetables,Images/cauliflower.jpg
+35,Oats,85,Grains,Images/oats.jpg
+36,Brown Rice,55,Grains,Images/brown_rice.jpg
+37,Chickpeas,45,Grains,Images/chickpeas.jpg
+38,Kiwi,85,Fruits,Images/kiwi.jpg
+39,Cherries,150,Fruits,Images/cherries.jpg
+40,Ground Turkey,160,Meat,Images/ground_turkey.jpg
+41,Sourdough Bread,55,Bakery,Images/sourdough.jpg
+42,Fresh Cream,65,Dairy,Images/cream.jpg
+43,Ghee,300,Dairy,Images/ghee.jpg
+44,Paneer,85,Dairy,Images/paneer.jpg
+45,Crab Meat,300,Seafood,Images/crab.jpg
+46,Pineapple,70,Fruits,Images/pineapple.jpg
+47,Bell Peppers (Red),70,Vegetables,Images/red_bell_pepper.jpg
+48,Spinach,50,Vegetables,Images/spinach.jpg
+49,Whole Wheat Bread,45,Bakery,Images/whole_wheat_bread.jpg
+50,Mangoes,90,Fruits,Images/mangoes.jpg

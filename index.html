@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Grocery Store</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-brand">
+                <i class="fas fa-store"></i>
+                <span>Smart Grocery Store</span>
+            </div>
+            <div class="navbar-controls">
+                <select id="category-select" onchange="filterProducts()">
+                    <option value="all">All Categories</option>
+                </select>
+                <div id="cart-icon" onclick="showCartPage()">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-count">0</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main id="store-page">
+        <h2 class="section-title">
+            <i class="fas fa-shopping-basket"></i>
+            Available Products
+        </h2>
+        <div id="product-list" class="products-grid"></div>
+    </main>
+
+    <main id="cart-page">
+        <button class="back-to-shop" onclick="hideCartPage()">
+            <i class="fas fa-arrow-left"></i>
+            Back to Shopping
+        </button>
+
+        <h2 class="section-title">
+            <i class="fas fa-shopping-cart"></i>
+            Shopping Cart
+        </h2>
+        <div class="cart-items" id="cart-items-full"></div>
+
+        <div class="cart-summary">
+            <h3>Order Summary</h3>
+            <div id="cart-summary-total" class="product-price"></div>
+            <button class="add-button" onclick="alert('Checkout functionality not implemented')">
+                <i class="fas fa-credit-card"></i>
+                Proceed to Payment
+            </button>
+        </div>
+
+        <h2 class="section-title">
+            <i class="fas fa-star"></i>
+            Frequently Bought Together
+        </h2>
+        <!-- Modified Frequently Bought Together Section -->
+        <div id="frequent-items">
+           
+            
+            <div class="frequent-items-wrapper">
+                <div id="frequent-items-group"></div>
+                <div class="frequent-items-summary">
+                    <div class="bundle-total">Total Bundle Price: ₹<span id="bundle-price">0</span></div>
+                    <button class="add-bundle-button" onclick="addBundleToCart()">
+                        <i class="fas fa-cart-plus"></i>
+                        Add All to Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="recommendations">
+            <h2 class="section-title">
+                <i class="fas fa-users"></i>
+                Customers Also Bought
+            </h2>
+            <div id="cart-recommendations" class="products-grid"></div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
